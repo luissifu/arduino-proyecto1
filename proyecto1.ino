@@ -18,18 +18,21 @@ const char light_potency = 1;
 const char led_win = 12;
 const char led_lose = 13;
 
+// game states
 const char NONE = 0;
 const char SETUP = 1;
 const char IN_GAME = 2;
-const char IN_GAME = 3;
+const char WAITING = 3;
 const char WIN = 4;
 const char LOSE = 5;
 
+// time vars
 long timeToPlay = 15000;
 unsigned long timeOnDark = 0;
 unsigned long lastTimeRead;
 
-int melody[] = {NOTE_C4, NOTE_G3,NOTE_G3, NOTE_A3, NOTE_G3,0, NOTE_B3, NOTE_C4};
+// songs
+int start_melody[] = {NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4};
 int duration[] = {4, 8, 8, 4, 4, 4, 4, 4};
 
 // vars
@@ -49,7 +52,7 @@ void setup() {
   pinMode(led_a,OUTPUT);
   pinMode(led_f,OUTPUT);
   pinMode(led_g,OUTPUT);
-  
+
   digitalWrite(led_e, LOW);
   digitalWrite(led_d, LOW);
   digitalWrite(led_c, LOW);
@@ -58,24 +61,22 @@ void setup() {
   digitalWrite(led_a, LOW);
   digitalWrite(led_f, LOW);
   digitalWrite(led_g, LOW);
- 
+
   // Leds
   pinMode(led_win,OUTPUT);
   pinMode(led_lose,OUTPUT);
-  
+
   // Speakers
   pinMode(speaker_melody,OUTPUT);
 }
 
-
-
-unsigned long delta(){
+unsigned long delta() {
   unsigned long deltaTime = lastTimeRead - millis();
   lasTimeRead = millis();
   return deltaTime;
 }
 
-boolean has_time(unsigned long deltaTime) {
+bool has_time(unsigned long deltaTime) {
   timeToPlay -= deltaTime;
   if(timeToPlay <= 0)
   {
@@ -89,15 +90,15 @@ boolean has_time(unsigned long deltaTime) {
     }
     return false;
   }
-  
+
   return true;
 }
 
 void loop() {
   unsigned long deltaTime = delta();
- switch (state)
- {
-   case IN_GAME:
+  switch (state)
+  {
+    case IN_GAME:
       if (has_time(deltaTime))
       {
         light_read = analogRead(light_potency);
@@ -119,45 +120,45 @@ void loop() {
           timeOnDark = 0;
         }
       }
-     break;
-   
-   case WAITING:
-     if (has_time(deltaTime))
-     {
-       light_read = analogRead(light_potency);
-       light_read = map(light_read,0,1023,0,255);
-       if (light_read > 200)
-       {
-         state = IN_GAME;
-       }
-     }
-     break;
-   
-   case WIN:
-     // play win sound
-     // flash win led
-     break;
-     
-   case LOSE:
-     // play lose sound
-     // flash lose led
-     break;
-     
-   case SETUP:
-     score = 0;
-     display_number(score); 
-     play_sound(melody, duration, 8, speaker_melody);
-     state = IN_GAME;
-     break;
-     
-   case NONE:
-   default:
-     break;
- }
+      break;
+
+    case WAITING:
+      if (has_time(deltaTime))
+      {
+        light_read = analogRead(light_potency);
+        light_read = map(light_read,0,1023,0,255);
+        if (light_read > 200)
+        {
+          state = IN_GAME;
+        }
+      }
+      break;
+
+    case WIN:
+      // play win sound
+      // flash win led
+      break;
+
+    case LOSE:
+      // play lose sound
+      // flash lose led
+      break;
+
+    case SETUP:
+      score = 0;
+      display_number(score);
+      play_sound(melody, duration, 8, speaker_melody);
+      state = IN_GAME;
+      break;
+
+    case NONE:
+    default:
+      break;
+  }
 }
 
 void display_number(char num) {
-  switch(num) 
+  switch(num)
   {
     case 0:
       digitalWrite(led_e, HIGH);
